@@ -1,4 +1,11 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+//发布到组织名称名字，必须填写
+group = "com.quangod"
+// 版本号，下次更新是只需要更改版本号即可
+version = "1.0.0"
 
 android {
     compileSdkVersion 23
@@ -7,6 +14,7 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 23
+        resourcePrefix "quangod"    //这个随便填
         versionCode 1
         versionName "1.0"
 
@@ -29,5 +37,78 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:recyclerview-v7:24.2.1'
+    /*侧滑删除*/
     compile 'com.yanzhenjie:recyclerview-swipe:1.0.2'
+}
+
+def siteUrl = 'https://github.com/sunchangquan93/PullToRefreshLibrary' // 修改为你的项目的主页
+def gitUrl = 'https://github.com/sunchangquan93/PullToRefreshLibrary.git' // 修改为你的Git仓库的url
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // Add your description here
+                name 'Android Jecent Library' //项目描述
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'quangod'    //填写的一些基本信息
+                        name 'quangod'
+                        email 'changquan1993@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+//task javadoc(type: Javadoc) {
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//}
+task javadoc(type: Javadoc){
+    options.encoding "UTF-8"
+    options.charSet 'UTF-8'
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        userOrg = "quangod"
+        repo = "quanquan"
+        name = "pulltorefreshlibrary"    //发布到JCenter上的项目名字
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
 }
